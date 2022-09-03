@@ -1,0 +1,401 @@
+#define BLYNK_TEMPLATE_ID           "TMPLRyqtjiCo"
+#define BLYNK_DEVICE_NAME           "Water"
+#define BLYNK_AUTH_TOKEN            "6BLKnhk9MnJGrfXnPB4GM1O33_ptTN7-"
+
+
+// Comment this out to disable prints and save space
+#define BLYNK_PRINT Serial
+#include <ESP8266_Lib.h>
+#include <BlynkSimpleShieldEsp8266.h>
+
+char auth[] = BLYNK_AUTH_TOKEN;
+
+// Your WiFi credentials.
+// Set password to "" for open networks.
+char ssid[] = "VivekSaini";
+char pass[] = "........";
+
+// Hardware Serial on Mega, Leonardo, Micro...
+//#define EspSerial Serial1
+
+// or Software Serial on Uno, Nano...
+#include <SoftwareSerial.h>
+SoftwareSerial EspSerial(2, 3); // RX, TX
+
+// Your ESP8266 baud rate:
+#define ESP8266_BAUD 9600
+
+/////////////////****Smart_Home******///////////////
+#define light_1 A5
+#define light_2 4
+#define light_3 5
+#define l1_button1 6
+/////////////////****Smart_Home******///////////////
+//
+//
+/////////////****Smoke_Detector******///////////////
+#define smoke A0
+#define buzzer A4
+#define fan 7
+#define fan_button2 8
+/////////////****Smoke_Detector******///////////////
+//
+//
+/////////////****Water_Level_Controler******///////////////
+#define trig A2
+#define echo 9
+#define motor_1 10
+#define m1_button3 11
+/////////////****Water_Level_Controler******///////////////
+//
+//
+/////////////////****Smart_Irrigation******///////////////
+#define moisture A3
+#define motor_2 12
+#define m2_button4 13
+/////////////////****Smart_Irrigation******///////////////
+
+
+/////////////////****Smart_Home******///////////////
+int lb1 = 0 ;
+/////////////////****Smart_Home******///////////////
+//
+//
+/////////////****Smoke_Detector******///////////////
+int fb2 = 0 ;
+int buzzerb = 0 ;
+int sensorthres = 100;
+/////////////****Smoke_Detector******///////////////
+//
+//
+/////////////****Water_Level_Controler******///////////////
+int distance;
+long duration;
+int mb3 = 0;
+/////////////****Water_Level_Controler******///////////////
+//
+//
+/////////////////****Smart_Irrigation******///////////////
+int mb4 = 0 ;
+int percentage;
+int value;
+/////////////////****Smart_Irrigation******///////////////
+
+ESP8266 wifi(&EspSerial);
+WidgetLCD lcd_1(V5); //Smoke_Detector
+WidgetLCD lcd_2(V8); //Water_Level_Controler
+
+BLYNK_CONNECTED() 
+{
+/////////////////****Smart_Home******///////////////
+  Blynk.syncVirtual(V0); 
+  Blynk.syncVirtual(V1); 
+  Blynk.syncVirtual(V2); 
+/////////////////****Smart_Home******///////////////
+//
+//
+/////////////****Smoke_Detector******///////////////
+  Blynk.syncVirtual(V3); 
+  Blynk.syncVirtual(V4); 
+/////////////****Smoke_Detector******///////////////
+//
+//
+/////////////****Water_Level_Controler******///////////////
+  Blynk.syncVirtual(V7);
+/////////////****Water_Level_Controler******///////////////
+//
+//
+/////////////////****Smart_Irrigation******///////////////
+  Blynk.syncVirtual(V9);
+/////////////////****Smart_Irrigation******///////////////
+}
+
+void setup()
+{
+/////////////////****Smart_Home******///////////////
+  pinMode(light_1, OUTPUT);
+  pinMode(light_2, OUTPUT);
+  pinMode(light_3, OUTPUT); 
+  pinMode(l1_button1, INPUT);
+  digitalWrite(light_1, LOW);
+  digitalWrite(light_2, LOW);
+  digitalWrite(light_3, LOW);
+/////////////////****Smart_Home******///////////////
+//
+//
+/////////////****Smoke_Detector******///////////////
+  pinMode(buzzer, OUTPUT); 
+  pinMode(fan, OUTPUT);
+  pinMode(smoke, INPUT);
+  pinMode(fan_button2, INPUT);
+  digitalWrite(buzzer, LOW); 
+  digitalWrite(fan, LOW); 
+/////////////****Smoke_Detector******///////////////
+//
+// 
+/////////////****Water_Level_Controler******///////////////
+  pinMode(trig, OUTPUT); 
+  pinMode(echo, INPUT);
+  pinMode(m1_button3, INPUT);
+  pinMode(motor_1, OUTPUT);
+  digitalWrite(motor_1, LOW);
+/////////////****Water_Level_Controler******///////////////
+//
+//
+/////////////////****Smart_Irrigation******///////////////
+  pinMode(motor_2, OUTPUT);
+  pinMode(moisture, INPUT);
+  pinMode(m2_button4, INPUT);
+  digitalWrite(motor_2, LOW);
+/////////////////****Smart_Irrigation******///////////////
+  
+  delay(10);
+  Serial.begin(9600);
+  EspSerial.begin(ESP8266_BAUD);
+  delay(10);
+  Blynk.begin(auth, wifi, ssid, pass);
+}
+
+
+/////////////////****Smart_Home******///////////////
+BLYNK_WRITE(V0) {
+  int val = param.asInt();
+  Serial.println("Value0 : " + String(val));
+  digitalWrite(light_1, val);
+  lb1 = val;
+  Serial.println(lb1);  
+}
+BLYNK_WRITE(V1) {
+  int val = param.asInt();
+  Serial.println("Value1 : " + String(val));
+  digitalWrite(light_2, val);}
+  
+BLYNK_WRITE(V2) {
+  int val = param.asInt();
+  Serial.println("Value2 : " + String(val));
+  digitalWrite(light_3, val);}
+/////////////////****Smart_Home******///////////////
+//
+//
+/////////////****Smoke_Detector******///////////////
+BLYNK_WRITE(V3) {
+  int val = param.asInt();
+  Serial.println("Value3 : " + String(val));
+  digitalWrite(fan, val);
+  fb2 = val;
+  Serial.println(fb2);  
+}
+BLYNK_WRITE(V4){
+  int val = param.asInt();
+  Serial.println("Value4 : " + String(val));
+  digitalWrite(buzzer, val);
+}
+/////////////****Smoke_Detector******///////////////
+//
+//
+/////////////****Water_Level_Controler******///////////////
+BLYNK_WRITE(V7) {
+  int val = param.asInt();
+  Serial.println("Value7 : " + String(val));
+  digitalWrite(motor_1, val);
+  mb3 = val;
+  Serial.println(mb3);
+}
+/////////////****Water_Level_Controler******///////////////
+//
+//
+/////////////////****Smart_Irrigation******///////////////
+BLYNK_WRITE(V9) {
+  int val = param.asInt();
+  Serial.println("Value9 : " + String(val));
+  digitalWrite(motor_2, val);
+  mb4 = val;
+  Serial.println(mb4);
+}
+/////////////////****Smart_Irrigation******///////////////
+
+void loop()
+{
+  Blynk.run();
+  Smart_Home();
+  Smoke_Detector();
+  Water_Level_Controler();
+  Smart_Irrigation();
+}
+
+
+/////////////////****Smart_Home******///////////////
+void Smart_Home()
+{
+    int lbstate;
+    lbstate = digitalRead(l1_button1);
+    if(lbstate == HIGH && lb1 == 0){
+      lb1 = 1;
+      Blynk.virtualWrite(V0,1);
+      digitalWrite(light_1,1);
+      Serial.println(lb1);
+      delay(1000);}
+    else if(lbstate == HIGH && lb1 == 1){
+      lb1 = 0;
+      Blynk.virtualWrite(V0,0);
+      digitalWrite(light_1,0);
+      Serial.println(lb1);
+      delay(1000);}
+}
+/////////////////****Smart_Home******///////////////
+//
+//
+/////////////****Smoke_Detector******///////////////
+void Smoke_Detector()
+{
+  int analogsensor=analogRead(smoke);
+  Serial.print("Pin A0:");
+  Serial.println(analogsensor);
+  lcd_1.print(0,0,"smoke ");
+  lcd_1.print(7,0,"Level:");
+  lcd_1.print(9,1,analogsensor-50);
+  if(analogsensor-50>sensorthres)
+  {
+    digitalWrite(buzzer,1);
+    digitalWrite(fan,1);
+    Blynk.virtualWrite(V4,1);
+    lcd_1.print(0,1,"Alert..!");
+  }
+  else
+  {
+    lcd_1.print(0,1,"Normal..");
+  }
+  int fbstate;
+  fbstate = digitalRead(fan_button2);
+    if (fbstate == HIGH && fb2 == 0){
+      fb2 = 1;
+      Blynk.virtualWrite(V3,1);
+      digitalWrite(fan,1);
+      Serial.println(fb2);
+      delay(1000);}
+    else if (fbstate == HIGH && fb2 == 1){
+      fb2 = 0;
+      Blynk.virtualWrite(V3,0);
+      digitalWrite(fan,0);
+      Serial.println(fb2);
+      delay(1000);  
+      }
+      
+    if (buzzerb == 1){
+      digitalWrite(buzzer, 1);
+      delay(100);
+      digitalWrite(buzzer, 0);
+      delay(100);
+     }
+    else if(buzzerb == 0){ 
+      digitalWrite(buzzer, 0);}
+}
+/////////////****Smoke_Detector******///////////////
+//
+//
+/////////////****Water_Level_Controler******///////////////
+void Water_Level_Controler()
+{
+  lcd_2.print(0,0,"Water ");
+  lcd_2.print(7,0,"Level:");
+  
+  delay(10);
+  
+  if(distance > 10){
+    lcd_2.print(7,1,"   Low ");
+  }
+  else if(distance > 6){
+    lcd_2.print(7,1,"Medium");
+  }
+  else if(distance >= 0){
+    lcd_2.print(7,1," High ");
+  }
+   digitalWrite(trig, LOW);                         // Clears the trigPin condition
+  delayMicroseconds(2);                               // Sets the trigPin HIGH (ACTIVE) for 10 microseconds
+  digitalWrite(trig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig, LOW);                       
+  
+  duration = pulseIn(echo, HIGH);                  // Reads the echoPin, returns the sound wave travel time in microseconds
+                                                      // Calculating the distance
+  distance = duration * 0.034 / 2;                    // Speed of sound wave divided by 2 (go and back)
+                                                      // Displays the distance on the Serial Monitor
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+
+  int buttonstate;
+  buttonstate = digitalRead(m1_button3);
+  
+  if (buttonstate == HIGH && mb3 == 0){
+    mb3 = 1;
+    Serial.println(mb3);
+    delay(10);}
+  else if (buttonstate == HIGH && mb3 == 1){
+    mb3 = 0;
+    Serial.println(mb3);
+    delay(10);}
+  
+  if(distance > 14 && mb3==0){
+    digitalWrite(motor_1, 1);
+    Blynk.virtualWrite (V7, 1);
+    }
+  else if(distance > 14 && mb3==1){
+    digitalWrite(motor_1, 1);
+    Blynk.virtualWrite (V7, 1);
+    }
+  else if(distance < 6 && mb3==1){
+    digitalWrite(motor_1, 0);
+    Blynk.virtualWrite (V7, 0);
+  }
+  else if(distance < 6 && mb3==0){
+    digitalWrite(motor_1, 0);
+    Blynk.virtualWrite (V7, 0);
+  }
+  else if(mb3==0 && 14 > distance && distance > 6){
+    digitalWrite(motor_1,0);
+    Blynk.virtualWrite(V7, 0);
+    }
+  else if(mb3==1 && 14 > distance && distance > 6){
+    digitalWrite(motor_1,1);
+    Blynk.virtualWrite(V7, 1);
+    }
+}
+/////////////****Water_Level_Controler******///////////////
+//
+//
+/////////////////****Smart_Irrigation******///////////////
+void Smart_Irrigation(){
+  int moisturesensor=analogRead(moisture);
+    percentage = moisturesensor/10;
+    value = 103 - percentage;
+    Blynk.virtualWrite(V9,value);
+    
+    if(percentage<50)          // Motor Off when value in blynk meter is greater than 53
+    {
+      digitalWrite(motor_2,0);
+      Blynk.virtualWrite(V9,0);
+      mb4=0;
+    }
+    else if(percentage>90)      // Motor ON when value in blynk meter is less then 13
+    {
+      digitalWrite(motor_2,1);
+      Blynk.virtualWrite(V9,1); 
+      mb4=1 ; 
+    }
+    int mbstate;
+    mbstate = digitalRead(m2_button4);
+    if (mbstate == HIGH && mb4 == 0){
+      mb4 = 1;
+      Blynk.virtualWrite(V9,1);
+      digitalWrite(motor_2,1);
+      Serial.println(mb4);
+      delay(1000);}
+    else if (mbstate == HIGH && mb4 == 1){
+      mb4 = 0;
+      Blynk.virtualWrite(V9,0);
+      digitalWrite(motor_2,0);
+      Serial.println(mb4);
+      delay(1000);
+      }}
+/////////////////****Smart_Irrigation******///////////////
